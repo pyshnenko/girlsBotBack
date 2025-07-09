@@ -1,0 +1,882 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API для дамского календарика",
+    "description": "для команд со страниц из webapp telegram",
+    "termsOfService": "https://spamigor.ru/",
+    "contact": {
+      "email": "pyshnenko94@yandex.ru"
+    },
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://spamigor.ru/"
+    },
+    {
+      "url": "http://localhost:8900/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "операции с пользователями",
+      "externalDocs": {
+        "description": "Развернуть",
+        "url": "/girls/api/users"
+      }
+    },
+    {
+      "name": "events",
+      "description": "операции с событиями",
+      "externalDocs": {
+        "description": "Развернуть",
+        "url": "/girls/api/events"
+      }
+    },
+    {
+      "name": "actions",
+      "description": "операции пользователей",
+      "externalDocs": {
+        "description": "Развернуть",
+        "url": "/girls/api/events"
+      }
+    },
+    {
+      "name": "groups",
+      "description": "операции с группами",
+      "externalDocs": {
+        "description": "Развернуть",
+        "url": "/girls/api/groups"
+      }
+    }
+  ],
+  "paths": {
+    "/girls/api/users": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Запрос списка пользователей",
+        "description": "полный перечень пользователей с информацией о них",
+        "operationId": "girlsList",
+        "parameters": [
+          {
+            "name": "groupID",
+            "in": "query",
+            "description": "id группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect or user not root"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/users/{id}": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "добавление пользователя",
+        "description": "добавляем пользователя в наш лист",
+        "operationId": "newGirls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/users"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "summary": "обновление пользователя",
+        "description": "добавляем пользователя в наш лист",
+        "operationId": "updGirls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/users"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "удаление пользователя",
+        "description": "добавляем пользователя в наш лист",
+        "operationId": "delGirls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id группы",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "tgId",
+            "in": "query",
+            "description": "telegramID удаляемого пользователя",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/events": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Запрос списка событий",
+        "description": "полный перечень событий",
+        "operationId": "eventsList",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "query",
+            "description": "id группы",
+            "required": false,
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "example": 1748434277243,
+              "type": "number"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "example": 1848434277243,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/events/{id}": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "summary": "добавление события",
+        "description": "добавляем событие в наш лист",
+        "operationId": "newEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/events"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "events"
+        ],
+        "summary": "обновление события",
+        "description": "добавляем событие в наш лист",
+        "operationId": "updEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/events"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "events"
+        ],
+        "summary": "удаление события",
+        "description": "удаляем событие из группы",
+        "operationId": "delEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 1
+            }
+          },
+          {
+            "name": "evtId",
+            "in": "query",
+            "description": "ID удаляемого события",
+            "required": true,
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/eventsYN/{id}": {
+      "put": {
+        "tags": [
+          "events"
+        ],
+        "summary": "согласие/отказ от события",
+        "description": "соглашаемся или отказываемся от участия в событии",
+        "operationId": "YoNEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          },
+          {
+            "name": "evtId",
+            "in": "query",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "you not admin"
+          },
+          "402": {
+            "description": "incorrect user data"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/calendar": {
+      "get": {
+        "tags": [
+          "actions"
+        ],
+        "summary": "Запрос календаря",
+        "description": "календарь",
+        "operationId": "calendar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1748438470916
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1751376070916
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/calendar/{id}": {
+      "post": {
+        "tags": [
+          "actions"
+        ],
+        "summary": "добавить или исправить даты",
+        "description": "задать или скорректировать даты, в которые пользователь свободен или занят",
+        "operationId": "calendaradd",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "freeDays": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "example": 1748438470916
+                    }
+                  },
+                  "busyDays": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "example": 1748697670916
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/groups": {
+      "get": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Запрос списка или поиск групп",
+        "description": "Поиск групп по id. Если параметр id пустой или отсутствует то будет выдан список групп, в которых состоит пользователь",
+        "operationId": "getUserGroups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "ID группы",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "создать группу",
+        "operationId": "createGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Название"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    },
+    "/girls/api/groups/{id}": {
+      "patch": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Обновить название группы",
+        "summary": "обновить группу",
+        "operationId": "updNameGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Название"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Обновить состав группы",
+        "summary": "обновить состав группы",
+        "operationId": "updGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "number",
+                    "example": 123456789
+                  },
+                  "admin": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "register": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Удалить группу",
+        "operationId": "delGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID группы",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Выполнено"
+          },
+          "401": {
+            "description": "id incorrect"
+          }
+        },
+        "security": [
+          {
+            "B_auth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "users": {
+        "type": "object",
+        "properties": {
+          "tgid": {
+            "type": "number",
+            "example": 123456789
+          },
+          "is_bot": {
+            "type": "boolean",
+            "example": false
+          },
+          "first_name": {
+            "type": "string",
+            "example": "fname"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "lname"
+          },
+          "username": {
+            "type": "string",
+            "example": "username"
+          },
+          "language_code": {
+            "type": "string",
+            "example": "lcode"
+          },
+          "register": {
+            "type": "boolean",
+            "example": false
+          },
+          "admin": {
+            "type": "boolean",
+            "example": false
+          },
+          "name": {
+            "type": "string",
+            "example": "Наказания"
+          }
+        }
+      },
+      "events": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": "id события"
+          },
+          "name": {
+            "type": "string",
+            "example": "название события"
+          },
+          "date": {
+            "type": "string",
+            "example": "2025-09-25T00:00:00.000Z"
+          },
+          "place": {
+            "type": "string",
+            "example": "место проведения"
+          },
+          "link": {
+            "type": "string",
+            "example": "место проведения"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "B_auth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
