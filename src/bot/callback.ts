@@ -8,7 +8,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
     //let session = {...ctx.session};
     ctx.deleteMessage();
     if (ctx.callbackQuery.data === 'YES') {
-        const group = await sql.active.getActiveDate(ctx.from.id);
+        const group = await sql.activeTest.get(ctx.from.id);
         if (session?.make === 'newEvent') {
             if (group) {
                 const eventID: number = (
@@ -34,11 +34,11 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
             else ctx.reply('Пожалуйста, нажми /start и начни с начала')
         }
         else if ((session?.make === 'freeDay') || (session?.make === 'busyDay')) {
-            let days: number[] = []
+            let days: Date[] = []
             if (Array.isArray(session?.result)) {
-                days = session.result.map((item: string)=>Number(new Date(`${session?.date?.year}-${session?.date?.month}-${item}`)))
+                days = session.result.map((item: string)=>new Date(`${session?.date?.year}-${session?.date?.month}-${item}`))
                 if (group) {
-                    (await sql.calendar.setCalendar(days, ctx.from.id, session.make === 'freeDay'?1:session?.make === 'busyDay'?2:null, group))
+                    (await sql.calendar.set(days, ctx.from.id, session.make === 'freeDay'?true:session?.make === 'busyDay'?false:false, group))
                     ctx.reply('Выполнено')
                 }
                 else ctx.reply('Пожалуйста, нажми /start и начни с начала')
@@ -46,11 +46,11 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
             else ctx.reply('что-то пошло не так')
         }
         else if (session?.make === 'new group') {
-            await sql.group.setGroup(ctx.from.id, String(session.result)||'none', true, true);
+            await sql.group.set(ctx.from.id, String(session.result)||'none', true, true);
             ctx.reply('Создано')
         }
         else if (session?.make === 'search group') {
-            await sql.group.setGroup(ctx.from.id, session?.result?.name, false, false, session?.result?.id);
+            await sql.group.set(ctx.from.id, session?.result?.name, false, false, session?.result?.id);
             ctx.reply('Заявка подана')
         }
         session = {}
@@ -83,7 +83,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
         }
         else if (command === 'setActiveGroup') {
             const is_admin = await sql.user.userCheck(ctx.from.id, commandIndex);
-            (await sql.active.setActiveDate(ctx.from.id, commandIndex)) ?
+            (await sql.activeTest.set(ctx.from.id, commandIndex)) ?
             GroupKeyboard(ctx, 'Группа задана', commandIndex, typeof(is_admin)==='boolean'?false:is_admin.admin) :
             ctx.reply('Что-то пошло не так')
         }

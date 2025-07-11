@@ -2,7 +2,7 @@ import { Context, Session } from "@/types/bot";
 import { Markup, Telegraf } from "telegraf";
 import { GroupKeyboard, searchGroupKeyboard } from "@/mech/keyboard";
 import { TGCheck, TGFrom } from "@/types/tgTypes";
-import { groupSearchResult } from "@/types/sql";
+import { GroupsAttr } from "@/types/sql";
 import { getMonth } from "@/consts/tg";
 import { YNKeyboard } from "@/mech/keyboard";
 import sql from "@/mech/sql";
@@ -29,7 +29,7 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
             break;
         }
         case 'Выбрать другую группу': {
-            sql.active.setActiveDate(ctx.from.id, 0);
+            sql.activeTest.set(ctx.from.id, 0);
             searchGroupKeyboard(ctx, 'Давай выберем другую группу')
             break;
         }
@@ -40,11 +40,11 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
         }
         case '🧾Выбрать группу из имеющихся у Вас': {
             session = {};
-            const groups = await sql.group.getGroup(ctx.from.id)
+            const groups = await sql.group.get(ctx.from.id)
             if (!groups) ctx.reply('что-то пошло не так. нажми /start')
             else {
                 ctx.replyWithHTML('Выбери группу',
-                    Markup.inlineKeyboard(groups.map((item: groupSearchResult)=>
+                    Markup.inlineKeyboard(groups.map((item: GroupsAttr)=>
                         Markup.button.callback(item.name, `setActiveGroup_${item.Id}`)))
                 )
             }
@@ -113,9 +113,9 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
                 YNKeyboard(ctx, mess)
             }
             else if (ctx.session?.make==='search group') {
-                const result = await sql.group.searchGroup(Number(ctx.message.text), ctx.from.id)
+                const result = await sql.group.search(Number(ctx.message.text))
                 if (result) {
-                    const searchMe = result.filter((item: groupSearchResult)=>item.tgId===ctx.from.id);
+                    const searchMe = result.filter((item: GroupsAttr)=>item.tgId===ctx.from.id);
                     if (searchMe.length && searchMe[0].register){
                         delete(session.make);
                         GroupKeyboard(ctx, 'Группа выбрана', searchMe[0].Id, searchMe[0].admin?true:false)

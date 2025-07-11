@@ -101,7 +101,7 @@ app.get("/girls/api/calendar", async (req: Request, res: Response) => {
         const to: Date = new Date(Number(req.query.to))
         if (from.toJSON() && to.toJSON())
             res.json({
-                calendar: await sql.calendar.getCalendar(from, to, Number(req.query?.id)),
+                calendar: await sql.calendar.get(Number(req.query?.id), from, null, to, true), ///JJJJJJJJJJJJJJJJJJJJ
                 users: await sql.user.userSearch({}, Number(req.query?.id)),
                 events: await sql.event.getEvent(Number(req.query?.id), from, to)
             })
@@ -114,8 +114,8 @@ app.post("/girls/api/calendar/:id", async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '');
     if (code.code === 200) {
         if (Array.isArray(req.body.freeDays) && Array.isArray(req.body.busyDays)){
-            await sql.calendar.setCalendar(req.body.freeDays, code.id||0, 1, Number(req.params['id']))
-            await sql.calendar.setCalendar(req.body.busyDays, code.id||0, 2, Number(req.params['id']))
+            await sql.calendar.set(req.body.freeDays, code.id||0, true, Number(req.params['id']))
+            await sql.calendar.set(req.body.busyDays, code.id||0, false, Number(req.params['id']))
             res.json(true)
         }
         else res.sendStatus(418)

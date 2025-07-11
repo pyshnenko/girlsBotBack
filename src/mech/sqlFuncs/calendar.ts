@@ -1,8 +1,80 @@
 import { Connection } from "mysql2/promise";
 import { calendar } from "@/types/sql";
 import { dateToSql } from "@/mech/sql";
+import SEQabsClass from "./helpers/SEQabsClass";
+import { Sequelize, Op } from "sequelize";
+import {logger} from '@/winston/logger';
+import sql from '@/mech/sql';
 
-export default class SQLCalendar {
+export class SQLdateListSEQ extends SEQabsClass {
+    model
+    constructor (sequelize: Sequelize) {
+        super(sequelize)
+        this.model = this._init.initDayListNew()
+    }
+    async get(id: number, date: Date, groupID?: number|null, dateTo?: Date, diap?: boolean) {
+        try {
+            const groupIDreal: number = groupID || await sql.activeTest.get(id) || 0;
+            if (groupIDreal === 0) return []
+            if (diap && dateTo) {
+                const aData = await this.model.findAll({
+                    raw: true, 
+                    where: {
+                        tgId: id,
+                        evtDate: {
+                            [Op.gte]: date.toISOString(),
+                            [Op.lte]: dateTo.toISOString()
+                        },
+                        groupId: groupIDreal
+                    }
+                })
+                return aData
+            }
+            else {
+                const aData = await this.model.findAll({
+                    raw: true, 
+                    where: {
+                        tgId: id,
+                        evtDate: date.toISOString(),
+                        groupId: groupIDreal
+                    }
+                })
+                return aData
+            }
+        } catch(e) {logger.log('warning', e); return []}
+    }
+    async set(evtDate: Date[], tgId: number, res: boolean, groupID: number) {
+        try {
+            evtDate.forEach(async (date:Date)=> {
+                const checkData = await this.get(tgId, date, groupID);
+                if (checkData.length>0) {
+                    await this.model.update({
+                        free: res
+                    }, {
+                        where: {
+                            tgId,
+                            evtDate: date.toISOString(),
+                            groupId: groupID
+                        }
+                    })
+                    return true
+                }
+                else {
+                    await this.model.create({
+                        evtDate: date.toISOString(),
+                        tgId: tgId,
+                        free: res,
+                        groupId: groupID
+                    })
+                    return true
+                }
+            })
+        }
+        catch(e) {logger.log('warning', e); return false}
+    }
+}
+
+/*export class SQLCalendar {
     connection: Connection;
 
     constructor (connection: Connection) {
@@ -53,4 +125,4 @@ export default class SQLCalendar {
             return false
         }
     }
-}
+}*/

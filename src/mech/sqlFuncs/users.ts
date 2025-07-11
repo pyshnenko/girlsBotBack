@@ -1,8 +1,58 @@
 import { Connection } from "mysql2/promise";
 import { TGFrom, TGCheck, FullTGForm } from "@/types/tgTypes";
 import { DataForUserSearch } from "@/types/tgTypes";
+import SEQabsClass from '@/mech/sqlFuncs/helpers/SEQabsClass';
+import { Sequelize, Model, fn, col } from 'sequelize';
+import { logger } from "@/winston/logger";
+import sql from '@/mech/sql'
+import { GroupModel } from "@/models/GroupsList";
 
 type UserOrNot<T> = T extends number ? Promise<false | TGCheck> : Promise<boolean>
+
+export class SQLusersSEQ extends SEQabsClass {
+    _model
+    constructor (sequelize: Sequelize) {
+        super(sequelize)
+        this._model = this._init.initUsers()
+    }
+
+    async _checkUser(id: number): Promise<TGFrom|false> {
+        const user: TGFrom[] = await this._model.findAll({where: {id}, raw: true})
+        return user.length ? user[0] : false
+    }
+
+    async add(group: {id: number, name: string}|null, id: number, admin: boolean, register: boolean, tgData:TGFrom) {
+        try {
+            const isUser = await this._checkUser(id);
+            if (!isUser) await this._model.create({
+                    ...tgData
+                })
+            if (group) await sql.group.updateUser(id, group.id, admin,register,group.name)
+        } catch(e){
+            logger.log('warn', e)
+        }
+    }
+
+    async search(data: DataForUserSearch, groupId: number) {
+        if (!data?.dataFields) data.dataFields = '*';
+        try {
+            if (groupId) {
+                sql.group.model.belongsTo(this._model, {foreignKey: 'tgId'})
+                this._model.hasMany(sql.group.model, {foreignKey: 'id'})
+                type WhereType = Omit<DataForUserSearch, 'id'|'dataFields'>|{Id: number};
+                let whereObj: WhereType = {
+                    Id: groupId
+                }
+                if (data?.register) whereObj = {...whereObj, register: data.register}
+                if (data?.admin) whereObj = {...whereObj, admin: data.admin}
+                let hist = await sql.group.model.findAll({raw: true, include: [this._model], where: {...whereObj}})
+                console.log(hist)
+            }
+        } catch(e) {
+            logger.log('warn', e)
+        }
+    }
+}
 
 export default class SQLUsers {
     connection: Connection;
@@ -26,9 +76,9 @@ id}, ${tgData?.is_bot||false}, "${tgData?.first_name||'noName'}", "${tgData?.las
                 if (group) {
                     await this.connection.query(`insert GroupsList(name, tgId, admin, register, Id) values("${group.name}", ${id}, ${admin?1:0}, ${register?1:0}, ${group.id})`);    
                 }
-                try{await this.connection.query(`alter table eventList add column id${id} bool default 0`)}
+                try{await this.connection.query(`alter table eventList add column id${id} int default 0`)}
                 catch(e: any) {}
-                try{await this.connection.query(`alter table dayList add column id${id} bool default 0`)}
+                try{await this.connection.query(`alter table dayList add column id${id} int default 0`)}
                 catch(e: any) {}
             }
             else if (group) {

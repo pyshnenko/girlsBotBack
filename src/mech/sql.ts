@@ -1,11 +1,13 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 import mysql from "mysql2";
-import SQLGroup from '@/mech/sqlFuncs/groups';
+import {SQLgroupSEQ} from '@/mech/sqlFuncs/groups';
 import SQLUsers from '@/mech/sqlFuncs/users';
 import SQLEvents from '@/mech/sqlFuncs/events';
-import SQLCalendar from '@/mech/sqlFuncs/calendar';
-import SQLActiveGroup from '@/mech/sqlFuncs/activeGroup';
+import {SQLdateListSEQ} from '@/mech/sqlFuncs/calendar';
+import {SQLActiveDateSEQ} from '@/mech/sqlFuncs/activeGroup';
+import {SQLusersSEQ} from '@/mech/sqlFuncs/users';
+import sequelize from '@/mech/sqlFuncs/helpers/seqInit';
 
 export const connection = mysql.createConnection({
     host: String(process.env.SQLHOST),
@@ -33,9 +35,11 @@ export function dateToSql(date: Date, needTime?: boolean) {
 
 export default {
     dateToSql,
-    calendar: new SQLCalendar(connection),
+    calendar: new SQLdateListSEQ(sequelize),
     event: new SQLEvents(connection),
     user: new SQLUsers(connection),
-    group: new SQLGroup(connection),
-    active: new SQLActiveGroup(connection)
+    usertest: new SQLusersSEQ(sequelize),
+    group: new SQLgroupSEQ(sequelize),
+ //   active: new SQLActiveGroup(connection),
+    activeTest: new SQLActiveDateSEQ(sequelize)
 }
