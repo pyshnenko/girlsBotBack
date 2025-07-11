@@ -2,6 +2,7 @@ import _UsersList from "@/models/UsersList";
 import _ActiveTable from "@/models/ActiveTable";
 import _dayList from "@/models/dayList";
 import _EventList from "@/models/eventList";
+import _EventListAgr from "@/models/eventListAgr";
 import _GroupsList from "@/models/GroupsList";
 import _dayListNew from "@/models/dayListNew";
 import { Model, Sequelize } from "sequelize";
@@ -31,6 +32,11 @@ class SQLinitModels {
   initEvent(): ReturnType<typeof _EventList> {
     const EventList = _EventList(this.sequelize);
     return EventList;
+  }
+  
+  initEventAgr(): ReturnType<typeof _EventListAgr> {
+    const EventListAgr = _EventListAgr(this.sequelize);
+    return EventListAgr;
   }
   
   initDayListNew(): ReturnType<typeof _dayListNew> {

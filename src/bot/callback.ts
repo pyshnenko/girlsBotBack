@@ -19,7 +19,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
                         session?.event?.location||'', 
                         session?.event?.linc||'', 
                         group))||0;
-                const users: TGFrom[] = await sql.user.userSearch({}, group);
+                const users: TGFrom[] = await sql.user.search({}, group) as TGFrom[];
                 await ctx.reply('добавлено')
                 users.map(async (item: TGFrom) => await bot.telegram.sendMessage(
                     item.id, 
@@ -82,7 +82,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
             ctx.reply('Введи даты через пробел или запятую. Например: 1, 2,3 4')
         }
         else if (command === 'setActiveGroup') {
-            const is_admin = await sql.user.userCheck(ctx.from.id, commandIndex);
+            const is_admin = await sql.user.check(ctx.from.id, commandIndex);
             (await sql.activeTest.set(ctx.from.id, commandIndex)) ?
             GroupKeyboard(ctx, 'Группа задана', commandIndex, typeof(is_admin)==='boolean'?false:is_admin.admin) :
             ctx.reply('Что-то пошло не так')

@@ -9,7 +9,7 @@ import sql from "@/mech/sql";
 
 export default async function message(ctx: Context, session: Session, bot: Telegraf) {
     //let session = {...ctx.session};
-    let checkUser: boolean | TGCheck = await sql.user.userCheck(ctx.from.id);
+    let checkUser: boolean | TGCheck = await sql.user.check(ctx.from.id);
     switch (ctx.message.text) {
         case '/info': {
             ctx.reply(Math.floor(Math.random()*10)%2?'Там-сям, туда-сюда':'Сбожьей помощью');
@@ -136,7 +136,7 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
                 YNKeyboard(ctx, `Группа будет называться:\n${ctx.message.text}`)
             }
             else if (ctx.message.text.includes('All') && ctx.from.id===Number(process.env.ADMIN)) {
-                const userList = await sql.user.userSearch({},0)
+                const userList = await sql.user.search({},0)
                 userList.map((item: TGFrom) => bot.telegram.sendMessage(item.id, ctx.message.text.slice(5)))
             }
         }

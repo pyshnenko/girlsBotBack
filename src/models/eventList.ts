@@ -1,7 +1,14 @@
-import { Sequelize } from "sequelize";
-import { DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, Model, BuildOptions } from "sequelize";
+import { EventAttr } from "@/types/sql";
+
+export interface EventModel extends Model<EventAttr>, EventAttr {}
+
+export type EventStatic = typeof Model & {
+    new (values?: object, options?: BuildOptions): EventModel;
+};
+
 export default function(sequelize: Sequelize) {
-  return sequelize.define('eventList', {
+  return <EventStatic>sequelize.define('eventList', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER,

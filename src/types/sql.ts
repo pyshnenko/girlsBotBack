@@ -43,3 +43,23 @@ export interface GroupsAttr {
     register: boolean,
     Id: number
 }
+
+export interface EventArgAttr {
+  id: number,
+  tgId: number,
+  res: boolean
+}
+
+export interface EventAttr {
+  id?: number,
+  authorID: number,
+  namestring: string,
+  dateevent: string,
+  place: string,
+  linc: string,
+  id209103348?: number,
+  id214455979?: number,
+  groupID: number,
+  id7682990265?: number,
+  id1308520456?: number
+}

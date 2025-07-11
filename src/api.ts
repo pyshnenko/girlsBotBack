@@ -102,7 +102,7 @@ app.get("/girls/api/calendar", async (req: Request, res: Response) => {
         if (from.toJSON() && to.toJSON())
             res.json({
                 calendar: await sql.calendar.get(Number(req.query?.id), from, null, to, true), ///JJJJJJJJJJJJJJJJJJJJ
-                users: await sql.user.userSearch({}, Number(req.query?.id)),
+                users: await sql.user.search({}, Number(req.query?.id)),
                 events: await sql.event.getEvent(Number(req.query?.id), from, to)
             })
         else res.sendStatus(418)
@@ -132,7 +132,7 @@ app.post("/girls/api/users/:id", async (req: Request, res: Response) => {
             const id: number = req.body.tgid;
             const name: string = req.body.name;
             const group: number = Number(req.params['id']);
-            const result = await sql.user.userAdd({id: group, name}, id, admin, req.body?.register || false, tgData);
+            const result = await sql.user.add({id: group, name}, id, admin, req.body?.register || false, tgData);
             res.json(result)
         }
         else res.sendStatus(418)
@@ -142,7 +142,7 @@ app.post("/girls/api/users/:id", async (req: Request, res: Response) => {
 app.get("/girls/api/users", async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '');
     if (code.code === 200) {
-        const result = await sql.user.userSearch({}, Number(req.query?.id))
+        const result = await sql.user.search({}, Number(req.query?.id))
         res.json(result)
     }
     else res.sendStatus(code.code)
@@ -151,7 +151,7 @@ app.get("/girls/api/users", async (req: Request, res: Response) => {
 app.delete("/girls/api/users/:id", async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '', true);
     if (code.code === 200) {
-        const result = await sql.user.delUser(Number(req.query?.tgId), Number(req.params['id']))
+        const result = await sql.user.del(Number(req.query?.tgId), Number(req.params['id']))
         res.json(result)
     }
 })
@@ -166,7 +166,7 @@ app.put("/girls/api/users/:tgid", async (req: Request, res: Response) => {
             const id: number = req.body.tgid;
             const group: number = Number(req.params['tgid']);
             const name: string = req.body.name;
-            const result = await sql.user.userAdd({id: group, name}, id, admin, req.body?.register || false, tgData);
+            const result = await sql.user.add({id: group, name}, id, admin, req.body?.register || false, tgData);
             res.json(result)
         }
         else res.sendStatus(418)
@@ -191,7 +191,7 @@ app.get("/girls/api/sqlCheck", async (req: Request, res: Response) => {
     const userId: number = Number(req.headers.authorization?.slice(7) || 0)
     if (!userId) res.sendStatus(401)
     else {
-        const sqlCheck: boolean|TGCheck = await sql.user.userCheck(userId);
+        const sqlCheck: boolean|TGCheck = await sql.user.check(userId);
         if (sqlCheck === false) res.sendStatus(401)
         else if (sqlCheck !== true && !sqlCheck.admin) res.sendStatus(403)
         else res.json(sqlCheck)

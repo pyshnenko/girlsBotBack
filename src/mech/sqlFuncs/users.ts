@@ -39,21 +39,52 @@ export class SQLusersSEQ extends SEQabsClass {
             if (groupId) {
                 sql.group.model.belongsTo(this._model, {foreignKey: 'tgId'})
                 this._model.hasMany(sql.group.model, {foreignKey: 'id'})
-                type WhereType = Omit<DataForUserSearch, 'id'|'dataFields'>|{Id: number};
+                type WhereType = Omit<DataForUserSearch, 'id'|'dataFields'>|{Id?: number, tgId?: number};
                 let whereObj: WhereType = {
                     Id: groupId
                 }
                 if (data?.register) whereObj = {...whereObj, register: data.register}
                 if (data?.admin) whereObj = {...whereObj, admin: data.admin}
-                let hist = await sql.group.model.findAll({raw: true, include: [this._model], where: {...whereObj}})
-                console.log(hist)
+                if (data?.id) whereObj = {...whereObj, tgId: data.id}
+                let hist: GroupModel|{[keys: string|symbol]: any}[] = await sql.group.model.findAll({raw: true, include: [this._model], where: {...whereObj}})
+                return hist.length ? hist[0] : []
             }
+            return await this._model.findAll({raw: true}) || []
         } catch(e) {
             logger.log('warn', e)
+            return []
+        }
+    }
+    async check(id: number, group?: number): Promise<boolean | TGCheck> {
+        try {
+            if (group) {
+                return (await sql.group.model.findAll({
+                    attributes: ['register', 'admin'],
+                    where: {
+                        tgId: id,
+                        Id: group
+                    }
+                }))[0] || false
+            }
+            else return false
+        } catch(e) {
+            logger.log('warn', e)
+            return false
+        }
+    }
+    async del(id: number, groupId: number): Promise<boolean> {
+        try {
+            await sql.group.model.destroy({where: {tgId: id, Id: groupId}})
+            if ((await sql.group.model.findAll({raw: true, where: {tgId: id}})).length===0)
+                await this._model.destroy({where: {id}})
+            return true
+        } catch(e) {
+            logger.log('warn', e)
+            return false
         }
     }
 }
-
+/*
 export default class SQLUsers {
     connection: Connection;
 
@@ -148,4 +179,4 @@ id}, ${tgData?.is_bot||false}, "${tgData?.first_name||'noName'}", "${tgData?.las
             return e?.errno === 1091 ? true : false
         }
     }
-}
+}*/

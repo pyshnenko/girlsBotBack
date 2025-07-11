@@ -48,5 +48,5 @@ bot.catch((err: any)=>{botLogger.log('error', err)});
 
 app.listen(8900, ()=>{botLogger.log('info', 'start on 8900')})
 
-sql.usertest.search({}, 1).then((res:any)=>console.log(res[0]));
+sql.eventAgr.getEvent(1, new Date('2025-05-01')).then((res:any)=>console.log(res));
 console.log(baseURL.botPages.users(209103348, 2))
