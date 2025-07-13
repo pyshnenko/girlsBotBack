@@ -41,6 +41,7 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
         case '🧾Выбрать группу из имеющихся у Вас': {
             session = {};
             const groups = await sql.group.get(ctx.from.id)
+            console.log(groups)
             if (!groups) ctx.reply('что-то пошло не так. нажми /start')
             else {
                 ctx.replyWithHTML('Выбери группу',
@@ -135,8 +136,8 @@ export default async function message(ctx: Context, session: Session, bot: Teleg
                 session.result = ctx.message.text;                
                 YNKeyboard(ctx, `Группа будет называться:\n${ctx.message.text}`)
             }
-            else if (ctx.message.text.includes('All') && ctx.from.id===Number(process.env.ADMIN)) {
-                const userList = await sql.user.search({},0)
+            else if (ctx.message?.text&&ctx.message.text.includes('All') && ctx.from.id===Number(process.env.ADMIN)) {
+                const userList = await sql.user.search({},0) as TGFrom[]
                 userList.map((item: TGFrom) => bot.telegram.sendMessage(item.id, ctx.message.text.slice(5)))
             }
         }

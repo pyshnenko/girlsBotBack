@@ -42,11 +42,11 @@ bot.on('message', async (ctx: any) => {
     ctx.session = await message((ctx as Context), (ctx as Context).session, bot);
 })
 
-//bot.launch();
+bot.launch();
 
-bot.catch((err: any)=>{botLogger.log('error', err)});
+bot.catch((err: any)=>{console.log(err)})//botLogger.log('error', err)});
 
 app.listen(8900, ()=>{botLogger.log('info', 'start on 8900')})
 
-sql.eventAgr.getEvent(1, new Date('2025-05-01')).then((res:any)=>console.log(res));
+sql.user.check(209103348, 1).then((res: any)=>console.log(res))
 console.log(baseURL.botPages.users(209103348, 2))

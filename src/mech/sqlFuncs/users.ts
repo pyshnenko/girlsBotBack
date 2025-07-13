@@ -47,7 +47,23 @@ export class SQLusersSEQ extends SEQabsClass {
                 if (data?.admin) whereObj = {...whereObj, admin: data.admin}
                 if (data?.id) whereObj = {...whereObj, tgId: data.id}
                 let hist: GroupModel|{[keys: string|symbol]: any}[] = await sql.group.model.findAll({raw: true, include: [this._model], where: {...whereObj}})
-                return hist.length ? hist[0] : []
+                //console.log(hist)
+                let outArr: FullTGForm[] = hist.map((item: any) =>{
+                    return {
+                        id: item.tgId,
+                        is_bot: item['UsersList.isBot']===1,
+                        first_name: item['UsersList.first_name'],
+                        last_name: item['UsersList.last_name'],
+                        username: item['UsersList.username'],
+                        language_code: item['UsersList.language_code'],
+                        is_premium: item['UsersList.is_premium']===1,
+                        name: item.name,
+                        Id: item.Id,
+                        register: item.register,
+                        admin: item.admin
+                    }
+                })
+                return hist.length ? outArr : []
             }
             return await this._model.findAll({raw: true}) || []
         } catch(e) {
@@ -55,18 +71,17 @@ export class SQLusersSEQ extends SEQabsClass {
             return []
         }
     }
-    async check(id: number, group?: number): Promise<boolean | TGCheck> {
+    async check(id: number, groupF?: number): Promise<boolean | TGCheck> {
         try {
-            if (group) {
-                return (await sql.group.model.findAll({
-                    attributes: ['register', 'admin'],
-                    where: {
-                        tgId: id,
-                        Id: group
-                    }
-                }))[0] || false
-            }
-            else return false
+            const group: number = groupF ? groupF : await sql.activeTest.get(id)||0;
+            return (await sql.group.model.findAll({
+                raw: true,
+                attributes: ['register', 'admin'],
+                where: {
+                    tgId: id,
+                    Id: group
+                }
+            }))[0] || false
         } catch(e) {
             logger.log('warn', e)
             return false

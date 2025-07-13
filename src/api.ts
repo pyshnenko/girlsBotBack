@@ -53,7 +53,7 @@ app.post('/girls/api/events/:id', async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '', true);
     if (code.code === 200) {
         if (code.id && req.body?.name && req.body?.date && req.body.place && req.body.link) {
-            const resp = await sql.event.addEvent(code.id, req.body.name, new Date(req.body.date), req.body.place, req.body.link, Number(req.params['id']));
+            const resp = await sql.event.add(code.id, req.body.name, new Date(req.body.date), req.body.place, req.body.link, Number(req.params['id']));
             res.json(resp)
         }
         else res.sendStatus(418);
@@ -65,7 +65,7 @@ app.put('/girls/api/events/:id', async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '', true);
     if (code.code === 200) {
         if (Number(req.params['id']) && req.body?.name && req.body?.date && req.body.place && req.body.link) {
-            await sql.event.updEvent(req.body.id, req.body.name, new Date(req.body.date), req.body.place, req.body.link, Number(req.params['id']))
+            await sql.event.upd(req.body.id, req.body.name, new Date(req.body.date), req.body.place, req.body.link, Number(req.params['id']))
             res.json(true)
         }
         else res.sendStatus(418);
@@ -77,7 +77,7 @@ app.put('/girls/api/eventsYN/:id', async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '');
     if (code.code === 200) {
         if (req.query.req && Number(req.params['id'])) {
-            await sql.event.YNEvent(Number(req.query?.evtId), req.query?.req === 'true' ? 1 : req.query.req === 'false' ? 2 : null, code.id||0, Number(req.params['id']))
+            await sql.event.YNEvt(Number(req.query?.evtId), req.query?.req === 'true' ? 1 : req.query.req === 'false' ? 2 : null, code.id||0, Number(req.params['id']))
             res.json(true)
         }
         else res.sendStatus(418);
@@ -88,7 +88,7 @@ app.put('/girls/api/eventsYN/:id', async (req: Request, res: Response) => {
 app.delete('/girls/api/events/:id', async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '', true);
     if (code.code === 200) {
-        await sql.event.delEvent(Number(req.query?.id), Number(req.params['id']))
+        await sql.event.del(Number(req.query?.id), Number(req.params['id']))
         res.json(true)
     }
     else res.sendStatus(code.code)
@@ -101,7 +101,7 @@ app.get("/girls/api/calendar", async (req: Request, res: Response) => {
         const to: Date = new Date(Number(req.query.to))
         if (from.toJSON() && to.toJSON())
             res.json({
-                calendar: await sql.calendar.get(Number(req.query?.id), from, null, to, true), ///JJJJJJJJJJJJJJJJJJJJ
+                calendar: await sql.calendar.get(Number(req.query?.id), from, to), ///JJJJJJJJJJJJJJJJJJJJ
                 users: await sql.user.search({}, Number(req.query?.id)),
                 events: await sql.event.getEvent(Number(req.query?.id), from, to)
             })
@@ -112,10 +112,11 @@ app.get("/girls/api/calendar", async (req: Request, res: Response) => {
 
 app.post("/girls/api/calendar/:id", async (req: Request, res: Response) => {
     const code = await checkAuth(req.headers.authorization || '');
+    console.log(req.body)
     if (code.code === 200) {
         if (Array.isArray(req.body.freeDays) && Array.isArray(req.body.busyDays)){
-            await sql.calendar.set(req.body.freeDays, code.id||0, true, Number(req.params['id']))
-            await sql.calendar.set(req.body.busyDays, code.id||0, false, Number(req.params['id']))
+            await sql.calendar.set(req.body.freeDays.map((item: number)=>new Date(item)), code.id||0, true, Number(req.params['id']))
+            await sql.calendar.set(req.body.busyDays.map((item: number)=>new Date(item)), code.id||0, false, Number(req.params['id']))
             res.json(true)
         }
         else res.sendStatus(418)
@@ -181,6 +182,7 @@ app.get("/girls/api/kudago/events", async (req: Request, res: Response) => {
                 Math.floor(Number(req.query?.to))));
             res.json(result.data)
         } catch (e) {
+            console.log(e)
             res.sendStatus(500)
         }
     }

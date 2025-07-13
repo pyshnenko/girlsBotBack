@@ -1,10 +1,7 @@
-import { Connection } from "mysql2/promise";
-import { eventListType } from "@/types/sql";
-import { dateToSql } from "@/mech/sql";
 import SEQabsClass from '@/mech/sqlFuncs/helpers/SEQabsClass';
 import { Sequelize, Model, fn, col, where, Op } from 'sequelize';
 import { logger } from "@/winston/logger";
-import { GroupsAttr } from "@/types/sql";
+import sqlDataToEventArrFunc from '@/mech/sqlFuncs/helpers/sqlDataToEventArrFunc'
 
 export class SQLeventsSEQ extends SEQabsClass {
     model
@@ -47,33 +44,46 @@ export class SQLeventsSEQ extends SEQabsClass {
     }
     async getEvent(groupID: number, from: Date, to?: Date): Promise<any[] | null> {
         try {
-            console.log(1111)
             const whereObj = to ? {
                 dateevent: {[Op.between]: [from.toISOString(), to.toISOString()]},
                 groupID
             } : {
-                dateevent: {[Op.lte]: from.toISOString()},
+                dateevent: {[Op.gte]: from.toISOString()},
                 groupID
             }
-            console.log(222)
             this.model.belongsTo(this.daysModel, {foreignKey: 'id'})
             this.daysModel.hasMany(this.model, {foreignKey: 'id'})
-            
-            console.log(333)
-            return await this.model.findAll({
+            const resultSQL = await this.model.findAll({
                 include: [this.daysModel],
                 order: ['dateevent'],
                 where: whereObj,
                 raw: true
             })
+            
+            return sqlDataToEventArrFunc(resultSQL)
         } catch (error) {
-            console.log(error)
             logger.log('warn', error)
             return null
         }
     }
+    async YNEvt (id: number, result: 1|2|null, tgId: number, group: number): Promise<boolean> {
+        try {
+            if ((await this.daysModel.findAll({raw: true, where: {
+                id, tgId
+            }})).length) await this.daysModel.update({res: result===1}, {where:{
+                tgId, id
+            }})
+            else await this.daysModel.create({
+                id, tgId, res: result===1
+            })
+            return true
+        } catch (error) {
+            logger.log('warn', error)
+            return false
+        }
+    }
 }
-
+/*
 export default class SQLEvents {
     connection: Connection;
 
@@ -140,4 +150,4 @@ export default class SQLEvents {
             return null
         }
     }
-}
+}*/

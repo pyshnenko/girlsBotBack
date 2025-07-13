@@ -14,6 +14,7 @@ export class SQLActiveDateSEQ extends SEQabsClass {
         this.model = this._init.initActive()
     }
     async get(id: number): Promise<number|null> {
+        console.log(id)
         const aData = await this.model.findAll({
             raw: true, 
             attributes: {exclude: ['id']}, 
@@ -28,7 +29,8 @@ export class SQLActiveDateSEQ extends SEQabsClass {
             const checkUser = await sql.group.checkUser(id, res)
             if (!checkUser) return false
             const active: number|null = await this.get(id)
-            if (active === null) await this.model.update({
+            console.log(active)
+            if (active !== null) await this.model.update({
                 groupId: res
             }, {
                 where: {
@@ -41,7 +43,7 @@ export class SQLActiveDateSEQ extends SEQabsClass {
             })
             return true
         } catch(e){
-            logger.log('warning', e)
+            logger.log('warn', e)
             return false
         }
     }

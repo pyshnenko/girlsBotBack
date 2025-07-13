@@ -35,8 +35,8 @@ export class SQLgroupSEQ extends SEQabsClass {
                 tgId: id,
                 Id: newId,
                 name,
-                admin,
-                register
+                admin: admin?1:0,
+                register: register?1:0
             })
             return true
         } catch(e) {
@@ -48,7 +48,7 @@ export class SQLgroupSEQ extends SEQabsClass {
         try {
             return await this.model.findAll({
                 raw: true, 
-                where: (groupID) ? 
+                where: !(groupID) ? 
                     {register: true, tgId} :
                     {tgId, Id: groupID}
             })
@@ -68,13 +68,16 @@ export class SQLgroupSEQ extends SEQabsClass {
     async updateUser(id: number, groupId: number, admin: boolean, register: boolean, name: string): Promise<boolean> {
         try {
             const check = await this.get(id, groupId)
-            if (check) await this.model.update({admin, register}, {where: {
+            if (check) await this.model.update({
+                admin: admin?1:0, 
+                register: register?1:0
+            }, {where: {
                 Id: groupId,
                 tgId: id
             }})
             else await this.model.create({
-                admin,
-                register,
+                admin: admin?1:0,
+                register: register?1:0,
                 Id: groupId,
                 tgId: id,
                 name
@@ -82,6 +85,14 @@ export class SQLgroupSEQ extends SEQabsClass {
             return true
         } catch(e) {
             logger.log('warn', e)
+            return false
+        }
+    }
+    async totalUser(groupID: number): Promise<number|false> {
+        try {
+            return await this.model.count({where: {Id: groupID}})
+        } catch (error) {
+            logger.log('warn', error)
             return false
         }
     }
