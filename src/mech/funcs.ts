@@ -6,6 +6,7 @@ export async function checkAuth(tok: string, admin: boolean = false): Promise<{c
         if (!userId) return {code: 401}
         else {
             const sqlCheck: boolean|TGCheck = await sql.user.check(userId);
+            console.log(sqlCheck)
             if (sqlCheck === false) return {code: 401}
             else if (sqlCheck !== true && !sqlCheck.admin) return admin ? {code: 403} : {code: 200, tg: sqlCheck, id: userId}
             else {
