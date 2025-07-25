@@ -12,7 +12,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
         if (session?.make === 'newEvent') {
             if (group) {
                 const eventID: number = (
-                    await sql.event.addEvent(
+                    await sql.event.add(
                         ctx.from.id, 
                         session?.event?.name||'', 
                         new Date(session?.event?.date||0), 
@@ -59,10 +59,10 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
     }
     else if (ctx.callbackQuery.data.includes('YES_event')) {
         const datas: string[] = ctx.callbackQuery.data.split('_');
-        await sql.event.YNEvent(Number(datas[3]), 1, ctx.from.id, Number(datas[2]))
+        await sql.event.YNEvt(Number(datas[3]), 1, ctx.from.id, Number(datas[2]))
     } else if (ctx.callbackQuery.data.includes('NO_event')) {
         const datas: string[] = ctx.callbackQuery.data.split('_');
-        await sql.event.YNEvent(Number(datas[3]), 2, ctx.from.id, Number(datas[2]))
+        await sql.event.YNEvt(Number(datas[3]), 2, ctx.from.id, Number(datas[2]))
     } else {
         const dataSplit: string[] = ctx.callbackQuery.data.split('_')
         const command = dataSplit[0];
@@ -84,7 +84,7 @@ export default async function callback(ctx: Context, session: Session, bot: Tele
         else if (command === 'setActiveGroup') {
             const is_admin = await sql.user.check(ctx.from.id, commandIndex);
             (await sql.activeTest.set(ctx.from.id, commandIndex)) ?
-            GroupKeyboard(ctx, 'Группа задана', commandIndex, typeof(is_admin)==='boolean'?false:is_admin.admin) :
+            GroupKeyboard(ctx, 'Группа задана', commandIndex, typeof(is_admin)==='boolean'?false:is_admin.admin===1) :
             ctx.reply('Что-то пошло не так')
         }
     }

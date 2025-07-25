@@ -9,11 +9,15 @@ import message from '@/bot/message';
 import callback from '@/bot/callback';
 import app from '@/api';
 import { botLogger } from '@/winston/logger';
-import sequelize from '@/mech/sqlFuncs/helpers/seqInit';
-import { SQLdateListSEQ } from './mech/sqlFuncs/calendar';
-import baseURL from './consts/baseURL';
-import sql from '@/mech/sql';
-import { ActiveAttributes } from "@/types/sql";
+import testJoinSQL from './mech/cronWorker';
+import cron from 'node-cron';
+import { addDays, startOfDay, addHours } from "date-fns";
+
+cron.schedule('0 17 * * *', () => {
+  let date = addHours(startOfDay(addDays(new Date(), 1)), 3);
+  testJoinSQL(bot, date.toISOString())
+});
+
 bot.use(session());
 
 bot.telegram.setMyCommands([
@@ -42,11 +46,8 @@ bot.on('message', async (ctx: any) => {
     ctx.session = await message((ctx as Context), (ctx as Context).session, bot);
 })
 
-//bot.launch();
+bot.launch();
 
 bot.catch((err: any)=>{botLogger.log('error', err)});
 
 app.listen(8900, ()=>{botLogger.log('info', 'start on 8900')})
-
-sql.eventAgr.getEvent(1, new Date('2025-05-01')).then((res:any)=>console.log(res));
-console.log(baseURL.botPages.users(209103348, 2))

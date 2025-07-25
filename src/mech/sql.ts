@@ -3,7 +3,7 @@ dotenv.config();
 import mysql from "mysql2";
 import {SQLgroupSEQ} from '@/mech/sqlFuncs/groups';
 //import SQLUsers, {SQLusersSEQ} from '@/mech/sqlFuncs/users';
-import SQLEvents, {SQLeventsSEQ} from '@/mech/sqlFuncs/events';
+import {SQLeventsSEQ} from '@/mech/sqlFuncs/events';
 import {SQLdateListSEQ} from '@/mech/sqlFuncs/calendar';
 import {SQLActiveDateSEQ} from '@/mech/sqlFuncs/activeGroup';
 import {SQLusersSEQ} from '@/mech/sqlFuncs/users';
@@ -36,8 +36,8 @@ export function dateToSql(date: Date, needTime?: boolean) {
 export default {
     dateToSql,
     calendar: new SQLdateListSEQ(sequelize),
-    event: new SQLEvents(connection),
-    eventAgr: new SQLeventsSEQ(sequelize),
+    //event: new SQLEvents(connection),
+    event: new SQLeventsSEQ(sequelize),
     user: new SQLusersSEQ(sequelize),
     usertest: new SQLusersSEQ(sequelize),
     group: new SQLgroupSEQ(sequelize),

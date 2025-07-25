@@ -13,7 +13,7 @@ export default async function start(ctx: Context, session: Session): Promise<Ses
         const group = await sql.activeTest.get(ctx.from.id);
         if (group) {
             checkUser = await sql.user.check(ctx.from.id, group);
-            GroupKeyboard(ctx, 'Держи клавиатурку', group, (typeof(checkUser)==='object'&&checkUser.admin))
+            GroupKeyboard(ctx, 'Держи клавиатурку', group, (typeof(checkUser)==='object'&&checkUser.admin===1))
         }
         else searchGroupKeyboard(ctx)
     }
